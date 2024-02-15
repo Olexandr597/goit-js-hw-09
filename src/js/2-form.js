@@ -1,64 +1,54 @@
-const form = document.querySelector(".feedback-form");
-const STORAGE_KEY = "feedback-form-state";
+const STORAGE_KEY = '"feedback-form-state"';
+const form = document.querySelector('.feedback-form');
 
-document.addEventListener('DOMContentLoaded', () => {
-    restoreData();
+form.addEventListener('input', () => {
+  const userMail = form.elements.email.value;
+  const userText = form.elements.message.value;
+
+  const data = {
+    mail: userMail,
+    text: userText,
+  };
+
+  saveInLS(STORAGE_KEY, data);
 });
 
-form.addEventListener('input', onFormInput);
-
-function onFormInput(event) {
-    const { name, value } = event.target;
-
-    if (name === 'email' || name === 'message') {
-        const data = {
-            ...loadFromLS(STORAGE_KEY),
-            [name]: value.trim(),
-        };
-
-        saveToLS(STORAGE_KEY, data);
-    }
+function loadFromLS(key) {
+  const data = localStorage.getItem(key);
+  try {
+    const result = JSON.parse(data);
+    return result;
+  } catch {
+    return data;
+  }
 }
 
-form.addEventListener('submit', onFormSubmit);
+function saveInLS(key, value) {
+  const jsonSave = JSON.stringify(value);
+  localStorage.setItem(key, jsonSave);
+}
 
-function onFormSubmit(event) {
-    event.preventDefault();
+function loadData() {
+  const { mail, text } = loadFromLS(STORAGE_KEY) || {};
+  form.elements.email.value = mail || '';
+  form.elements.message.value = text || '';
+}
 
-    const email = form.elements.email.value.trim();
-    const message = form.elements.message.value.trim();
+loadData();
 
-    if (!email) {
-        alert('Email field must be filled in');
-        return;
-    } else if (!message) {
-        alert("Message field can't be empty!");
-        return;
-    }
+form.addEventListener('submit', e => {
+  e.preventDefault();
 
-    console.log('Form submitted successfully. Email sent to:', email);
+  if (form.elements.email.value && form.elements.message.value !== '') {
+    const data = loadFromLS(STORAGE_KEY) || {};
     localStorage.removeItem(STORAGE_KEY);
     form.reset();
-}
-
-function saveToLS(key, value) {
-    const jsonData = JSON.stringify(value);
-    localStorage.setItem(key, jsonData);
-}
-
-function loadFromLS(key) {
-    try {
-        const data = localStorage.getItem(key);
-        return JSON.parse(data) || {};
-    } catch (error) {
-        console.error('Error loading data from localStorage:', error.message);
-        return {};
-    }
-}
-
-function restoreData() {
-    const data = loadFromLS(STORAGE_KEY);
-
-    form.elements.email.value = data.email || '';
-    form.elements.message.value = data.message || '';
-}
+    const sendData = {
+      email: data.mail,
+      message: data.text,
+    };
+    console.log(sendData);
+  } else {
+    alert(`Please fill in all form fields before submitting.`);
+  }
+});
