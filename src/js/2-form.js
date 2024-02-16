@@ -6,8 +6,8 @@ form.addEventListener('input', () => {
   const userText = form.elements.message.value;
 
   const data = {
-    mail: userMail,
-    text: userText,
+    email: userMail,
+    message: userText,
   };
 
   saveInLS(STORAGE_KEY, data);
@@ -23,15 +23,24 @@ function loadFromLS(key) {
   }
 }
 
+// function saveInLS(key, value) {
+//   const jsonSave = JSON.stringify(value);
+//   localStorage.setItem(key, jsonSave);
+// }
 function saveInLS(key, value) {
-  const jsonSave = JSON.stringify(value);
+  const trimmedValue = {
+    email: value.email.trim(),
+    message: value.message.trim(),
+  };
+  const jsonSave = JSON.stringify(trimmedValue);
   localStorage.setItem(key, jsonSave);
 }
 
+
 function loadData() {
-  const { mail, text } = loadFromLS(STORAGE_KEY) || {};
-  form.elements.email.value = mail || '';
-  form.elements.message.value = text || '';
+  const { email, message } = loadFromLS(STORAGE_KEY) || {};
+  form.elements.email.value = email || '';
+  form.elements.message.value = message || '';
 }
 
 loadData();
